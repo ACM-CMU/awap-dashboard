@@ -7,6 +7,7 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
+    "noImplicitAny": false,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "node",
@@ -16,7 +17,7 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@components": ["src/components"],
+      "@components/*": ["src/components/*"],
       "@layout": ["src/layout"],
       "@layout/*": ["src/layout/*"],
       "@models": ["src/models"],

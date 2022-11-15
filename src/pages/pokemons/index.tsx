@@ -11,7 +11,7 @@ import {
   faEllipsisVertical, faSort, faSortDown, faSortUp,
 } from '@fortawesome/free-solid-svg-icons'
 import React, { PropsWithChildren, useEffect, useState } from 'react'
-import { ImageFallback } from '@components'
+import { ImageFallback } from '@components/*'
 import ReactPaginate from 'react-paginate'
 import { useRouter } from 'next/router'
 
