@@ -3,6 +3,31 @@ import Image from "next/image";
 import FilePreview from "./FilePreview";
 import styles from "@styles/DropZone.module.css";
 
+
+import {
+  DynamoDB,
+  DynamoDBClientConfig,
+  GetItemCommand,
+  PutItemCommand,
+} from '@aws-sdk/client-dynamodb'
+import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
+
+const config  = {
+  credentials: {
+    accessKeyId: process.env.NEXT_AUTH_AWS_ACCESS_KEY,
+    secretAccessKey: process.env.NEXT_AUTH_AWS_SECRET_KEY,
+  },
+  region: 'us-east-1',
+}
+
+const client = DynamoDBDocument.from(new DynamoDB(config), {
+  marshallOptions: {
+    convertEmptyValues: true,
+    removeUndefinedValues: true,
+    convertClassInstanceToMap: true,
+  },
+})
+
 const DropZone = ({ data, dispatch }) => {
   // onDragEnter sets inDropZone to true
   const handleDragEnter = (e) => {
@@ -81,18 +106,21 @@ const DropZone = ({ data, dispatch }) => {
 
     // Upload the files as a POST request to the server using fetch
     // Note: /api/fileupload is not a real endpoint, it is just an example
-    const response = await fetch("/api/fileupload", {
-      method: "POST",
-      body: formData,
-    });
-
-    //successful file upload
-    if (response.ok) {
-      alert("Files uploaded successfully");
-    } else {
-      // unsuccessful file upload
-      alert("Error uploading files");
-    }
+    //post endpoints
+    // Load the AWS SDK for Node.js
+    console.log("hola");
+    console.log(client);
+    await client.send(
+      new PutItemCommand({
+        TableName: process.env.NEXT_AUTH_AWS_TABLE_NAME,
+        Item: {
+          username: { S: 'bob' },
+          password: { S: 'hob' },
+          role: { S: 'user' },
+        },
+      }),
+    )
+    console.log("success");
   };
 
   return (
