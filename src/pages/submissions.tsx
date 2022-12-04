@@ -36,6 +36,9 @@ import {
   faTwitter,
 } from '@fortawesome/free-brands-svg-icons'
 import React, { useReducer }  from 'react'
+import { useState } from "react";
+import axios from "axios";
+
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Filler)
 
@@ -59,6 +62,64 @@ export default function Submissions(){
         inDropZone: false,
         fileList: [],
     });
+
+    // to handle file uploads
+    const uploadFile = async () => {
+    // get the files from the fileList as an array
+    let files = data.fileList;
+    // initialize formData object
+    const formData = new FormData();
+    // loop over files and add to formData
+    files.forEach((file) => formData.append("files", file));
+    const file = files[0];
+    // Upload the files as a POST request to the server using fetch
+    // Note: /api/fileupload is not a real endpoint, it is just an example
+    //post endpoints
+    // Load the AWS SDK for Node.js
+    // const postResponse = await fetch("/api/fileupload", {
+    //   method: "POST",
+    //   body: formData,
+    // });
+    // setUploadingStatus("Uploading the file to AWS S3");
+    
+    try {
+      let { data1 } = await axios.post("/uploadComponent/uploadFile", {
+      name: file.name,
+      type: file.type,
+    });
+    }
+    catch(error){
+      console.log(error.response.data);
+    }
+
+    // console.log(data);
+
+    // const url = data1.url;
+    // let { data2} = await axios.put(url, file, {
+    //   headers: {
+    //     "Content-type": file.type,
+    //     "Access-Control-Allow-Origin": "*",
+    //   },
+    // });
+
+    //setUploadedFile(BUCKET_URL + file.name);
+    //setFile(null);
+
+    // console.log("hola");
+    // console.log(client);
+    // console.log(data);
+    // await client.send(
+    //   new PutItemCommand({
+    //     TableName: process.env.NEXT_PUBLIC_AWS_TABLE_NAME,
+    //     Item: {
+    //       BOT_FILE_NAME: { S: 'newplayer' },
+    //       TEAM_NAME: { S: 'player2' },
+    //     },
+    //   }),
+    // )
+    // console.log("success");
+    };
+
     return (
         <AdminLayout>
           <div className="row">
@@ -78,7 +139,13 @@ export default function Submissions(){
             <main className={styles.main}>
               <h1 className={styles.title}>Upload your Submission here: </h1>
               {/* Pass state data and dispatch to the DropZone component */}
+
               <DropZone data={data} dispatch={dispatch} />
+              {data.fileList.length > 0 && (
+                <button className={styles.uploadBtn} onClick={uploadFile}>
+                  Upload
+                </button>
+              )}
             </main>
 
           </div>

@@ -29,6 +29,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  console.log(process.env.NEXT_AUTH_AWS_ACCESS_KEY);
   const { username, password } = req.body
 
   const hashedpassword = await hash(password, 10)

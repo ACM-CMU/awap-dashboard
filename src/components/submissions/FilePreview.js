@@ -2,6 +2,7 @@ import React from "react";
 import styles from "@styles/FilePreview.module.css";
 
 const FilePreview = ({ fileData }) => {
+  console.log(fileData);
   return (
     <div className={styles.fileList}>
       <div className={styles.fileContainer}>

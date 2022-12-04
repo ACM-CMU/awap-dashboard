@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+// require("dotenv").config();
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import FilePreview from "./FilePreview";
 import styles from "@styles/DropZone.module.css";
-
-
 import {
   DynamoDB,
   DynamoDBClientConfig,
@@ -11,24 +10,13 @@ import {
   PutItemCommand,
 } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
+import axios from "axios";
 
-const config  = {
-  credentials: {
-    accessKeyId: process.env.NEXT_AUTH_AWS_ACCESS_KEY,
-    secretAccessKey: process.env.NEXT_AUTH_AWS_SECRET_KEY,
-  },
-  region: 'us-east-1',
-}
 
-const client = DynamoDBDocument.from(new DynamoDB(config), {
-  marshallOptions: {
-    convertEmptyValues: true,
-    removeUndefinedValues: true,
-    convertClassInstanceToMap: true,
-  },
-})
 
 const DropZone = ({ data, dispatch }) => {
+  // console.log(process.env.NODE_ENV);
+  //console.log(Stringprocess.env.NEXT_AUTH_AWS_SECRET_KEY);
   // onDragEnter sets inDropZone to true
   const handleDragEnter = (e) => {
     e.preventDefault();
@@ -95,33 +83,6 @@ const DropZone = ({ data, dispatch }) => {
     }
   };
 
-  // to handle file uploads
-  const uploadFiles = async () => {
-    // get the files from the fileList as an array
-    let files = data.fileList;
-    // initialize formData object
-    const formData = new FormData();
-    // loop over files and add to formData
-    files.forEach((file) => formData.append("files", file));
-
-    // Upload the files as a POST request to the server using fetch
-    // Note: /api/fileupload is not a real endpoint, it is just an example
-    //post endpoints
-    // Load the AWS SDK for Node.js
-    console.log("hola");
-    console.log(client);
-    await client.send(
-      new PutItemCommand({
-        TableName: process.env.NEXT_AUTH_AWS_TABLE_NAME,
-        Item: {
-          username: { S: 'bob' },
-          password: { S: 'hob' },
-          role: { S: 'user' },
-        },
-      }),
-    )
-    console.log("success");
-  };
 
   return (
     <>
@@ -150,11 +111,6 @@ const DropZone = ({ data, dispatch }) => {
       {/* Pass the selectect or dropped files as props */}
       <FilePreview fileData={data} />
       {/* Only show upload button after selecting atleast 1 file */}
-      {data.fileList.length > 0 && (
-        <button className={styles.uploadBtn} onClick={uploadFiles}>
-          Upload
-        </button>
-      )}
     </>
   );
 };
