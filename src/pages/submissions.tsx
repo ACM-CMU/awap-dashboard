@@ -36,39 +36,62 @@ import {
   faTwitter,
 } from '@fortawesome/free-brands-svg-icons'
 import React, { useReducer }  from 'react'
-import { useState } from "react";
 import axios from "axios";
+import { useEffect, useState } from "react";
 
 import "primereact/resources/themes/lara-light-indigo/theme.css";  //theme
 import "primereact/resources/primereact.min.css";                  //core css
 import "primeicons/primeicons.css";  
 
 import { FileUpload } from 'primereact/fileupload';
+import { SelectParametersFilterSensitiveLog } from '@aws-sdk/client-s3';
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Filler)
 
 const random = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
 
 
+
 export default function Submissions(){
-    // const reducer = (state, action) => {
-    //     switch (action.type) {
-    //       case "SET_IN_DROP_ZONE":
-    //         return { ...state, inDropZone: action.inDropZone };
-    //       case "ADD_FILE_TO_LIST":
-    //         return { ...state, fileList: state.fileList.concat(action.files) };
-    //       default:
-    //         return state;
-    //     }
-    // };
-    
-    
-    // // destructuring state and dispatch, initializing fileList to empty array
-    // const [data, dispatch] = useReducer(reducer, {
-    //     inDropZone: false,
-    //     fileList: [],
-    // });
-    console.log("hello");
+    const [file, setFile] = useState<any>(null);
+    const [uploadingStatus, setUploadingStatus] = useState<boolean>(false);
+  
+    const uploadFile = async () => {
+      setUploadingStatus(true);
+      let time1 =  new Date().toLocaleString();
+      let team = "teamagent2"
+      let time = time1.split('/').join('-');
+      let fileName = "bot-"+team+"-"+time+".py";
+      // time = time.replace(/\//g, '-');
+      let { data } = await axios.post("/api/s3-upload", {
+        name: fileName,
+        type: file.type,
+      });
+  
+      const fileUrl = data.url;
+      await axios.put(fileUrl, file, {
+        headers: {
+          "Content-type": file.type,
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
+
+      await axios.post("/api/dynamo-upload", {
+        team: team,
+        fileName: fileName,
+      });
+
+  
+      setUploadingStatus(false);
+      setFile(null);
+    };
+  
+    useEffect(() => {
+      if (file) {
+        const uploadedFileDetail = async () => await uploadFile();
+        uploadedFileDetail();
+      }
+    }, [file]);
 
     return (
         <AdminLayout>
@@ -79,8 +102,9 @@ export default function Submissions(){
                 Upload Submission
             </Card.Header>
             <Card.Body>
-            <FileUpload name="demo" url="/api/s3-upload"></FileUpload>
+            {/* <FileUpload name="demo" url="/api/s3-upload"></FileUpload> */}
             {/* <input type="file" url="/api/s3-upload" /> */}
+            <input type="file" name = "image" id ="selectFile" onChange={(e:any) => setFile(e.target.files[0])} />
             </Card.Body>
           </Card>
           
