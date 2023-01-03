@@ -31,7 +31,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     try {
-        let { team, fileName } = req.body;
+        let { uploadedName, team, fileName } = req.body;
         let s = process.env.S3_URL_TEMPLATE;
         let s3url = s + fileName;
         const teamUser = await client.send(
@@ -52,15 +52,17 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
                         CURRENT_SUBMISSION_URL: { S: s3url },
                         PREVIOUS_SUBMISSION_URLS: { SS: [s3url] },
                         RATING: { N: "0" },
+                        UPLOADED_FILE_NAME: { SS: [uploadedName] },
                     },
                 })
             );
         }
         else {
             const prevSubs = teamUser.Item.PREVIOUS_SUBMISSION_URLS.SS;
-            if (prevSubs) {
+            const prevUploaded = teamUser.Item.UPLOADED_FILE_NAME.SS;
+            if (prevSubs && prevUploaded) {
                 prevSubs.push(s3url);
-
+                prevUploaded.push(uploadedName);
 
                 client.send(
                     new UpdateItemCommand({
@@ -68,12 +70,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
                         Key: {
                             TEAM_NAME: { S: team },
                         },
-                        UpdateExpression: "SET BOT_FILE_NAME = :fileName, CURRENT_SUBMISSION_URL = :s2, PREVIOUS_SUBMISSION_URLS = :prevSubs, RATING = :rating",
+                        UpdateExpression: "SET BOT_FILE_NAME = :fileName, CURRENT_SUBMISSION_URL = :s2, PREVIOUS_SUBMISSION_URLS = :prevSubs, RATING = :rating, UPLOADED_FILE_NAME = :uploadedName",
                         ExpressionAttributeValues: {
                             ':fileName': { S: fileName },
                             ':s2': { S: s3url },
                             ':rating': { N: "2" },
                             ':prevSubs': { SS: prevSubs },
+                            ':uploadedName': { SS: prevUploaded },
                         },
                         ReturnValues: "UPDATED_NEW",
                     })

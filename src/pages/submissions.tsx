@@ -80,6 +80,10 @@ const client = DynamoDBDocument.from(new DynamoDB(config), {
   },
 })
 const TableRow: React.FC<{ submission: any }> = ({ submission }) => {
+  // let timeStamp = "default";
+  // if(!submission.submissionURL) {
+    
+  // }
   return (
     <tr className="align-middle">
       <td className="text-center">
@@ -96,25 +100,25 @@ const TableRow: React.FC<{ submission: any }> = ({ submission }) => {
         </div>
       </td>
       <td>
-        <div>bot5.py</div>
+        <div><a href={submission.submissionURL} target="_blank">{submission.fileName}</a></div>
       </td>
       <td>
         <div className="clearfix">
           <div className="float-start">
-            <div className="fw-semibold">100%</div>
+            <div className="fw-semibold">30%</div>
           </div>
           <div className="float-end">
 
           </div>
         </div>
-        <ProgressBar className="progress-thin" variant="success" now={100} />
+        <ProgressBar className="progress-thin" variant="success" now={30} />
       </td>
-      <td className="text-center">
+      {/* <td className="text-center">
         <FontAwesomeIcon icon={faFoursquare} size="lg" fixedWidth />
-      </td>
+      </td> */}
       <td>
         <div className="small text-black-50"></div>
-        <div className="fw-semibold">10 sec ago</div>
+        <div className="fw-semibold">{submission.timeStamp}</div>
       </td>
       <td>
         <Dropdown align="end">
@@ -181,6 +185,7 @@ const Submissions : NextPage = ({submission_data,}: InferGetServerSidePropsType<
     });
 
     await axios.post("/api/dynamo-upload", {
+      uploadedName: file.name,
       team: team,
       fileName: fileName,
     });
@@ -233,10 +238,10 @@ const Submissions : NextPage = ({submission_data,}: InferGetServerSidePropsType<
                       <th className="text-center">
                         <FontAwesomeIcon icon={faUsers} fixedWidth />
                       </th>
-                      <th>File Name</th>
-                      <th>Bot Win Rate</th>
-                      <th className="text-center">Successful</th>
-                      <th>Date Submitted</th>
+                      <th>Uploaded File Name</th>
+                      <th>Elo Change</th>
+                      {/* <th className="text-center">Successful</th> */}
+                      <th>Time Submitted</th>
                       <th aria-label="Action" />
                     </tr>
                   </thead>
@@ -259,35 +264,61 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     TableName: process.env.NEXT_AUTH_AWS_TABLE_NAME,
     KeyConditionExpression: 'TEAM_NAME = :team_name',
     ExpressionAttributeValues: {
-      ':team_name': { S: "teamtest1" },
+      ':team_name': { S: "testteam2" },
     },
   }
 
   const command = new QueryCommand(params)
   const result = await client.send(command)
-  let submission_data = [{
-    fileName: "defaultName",
-    submissionURL: "defaulturl"
-  }]
+  if(!result.Items[0]){
+    return {
+      props: {
+        submission_data: []
+      }
+    }
 
-  if (result.Items) {
-    const submission_data1 = result.Items[0];
-    if(submission_data1){
-      let submission_data2 = submission_data1.PREVIOUS_SUBMISSION_URLS.SS;
-      if (submission_data2){
-        return submission_data2.map((item: any) => ({
-        fileName: "hey",
-        submissionURL: item
-      }))
-    }
-    }
-    else{
-      submission_data = []
+  }
+  let submission_data: {
+    fileName: string;
+    submissionURL: any;
+    timeStamp: any;
+}[] = new Array(result.Items[0].PREVIOUS_SUBMISSION_URLS.SS.length);
+  for (let i = 0; i < result.Items[0].PREVIOUS_SUBMISSION_URLS.SS.length; i++){
+    submission_data[i] = {
+      fileName: result.Items[0].UPLOADED_FILE_NAME.SS[i],
+      submissionURL: result.Items[0].PREVIOUS_SUBMISSION_URLS.SS[i],
+      timeStamp: result.Items[0].PREVIOUS_SUBMISSION_URLS.SS[i].slice(-21).slice(0,-3)
     }
   }
-  else{
-    submission_data = []
-  }
+  // let submission_data = result.Items[0].PREVIOUS_SUBMISSION_URLS.SS.map((item: any) => ({
+  //   fileName: "hey",
+  //   submissionURL: item
+  // }))
+
+  // let submission_data = [{
+  //   fileName: "defaultName",
+  //   submissionURL: "defaulturl"
+  // }]
+
+
+  // if (result.Items) {
+  //   const submission_data1 = result.Items[0];
+  //   if(submission_data1){
+  //     let submission_data2 = submission_data1.PREVIOUS_SUBMISSION_URLS.SS;
+  //     if (submission_data2){
+  //       return submission_data2.map((item: any) => ({
+  //       fileName: "hey",
+  //       submissionURL: item
+  //     }))
+  //   }
+  //   }
+  //   else{
+  //     submission_data = []
+  //   }
+  // }
+  // else{
+  //   submission_data = []
+  // }
 
 
   return {
