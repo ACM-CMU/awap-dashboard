@@ -33,6 +33,7 @@ interface Match {
   type: string;
   status: string;
   outcome: string;
+  replay: string;
 }
 
 export default async function handler(
@@ -49,7 +50,7 @@ export default async function handler(
   const params: ScanCommandInput = {
     TableName: process.env.AWS_MATCH_TABLE_NAME,
     ProjectionExpression:
-      'MATCH_ID, TEAM_1, TEAM_2, MATCH_TYPE, MATCH_STATUS, OUTCOME',
+      'MATCH_ID, TEAM_1, TEAM_2, MATCH_TYPE, MATCH_STATUS, OUTCOME, REPLAY_URL',
     FilterExpression: 'MATCH_TYPE = :matchType',
     ExpressionAttributeValues: {
       ':matchType': { S: 'tournament' },
@@ -69,6 +70,7 @@ export default async function handler(
       outcome: item.OUTCOME.S,
       type: item.MATCH_TYPE.S,
       status: item.MATCH_STATUS.S,
+      replay: item.REPLAY_URL.S,
     }));
   }
 

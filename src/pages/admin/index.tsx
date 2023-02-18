@@ -15,26 +15,27 @@ interface Match {
   type: string;
   status: string;
   outcome: string;
+  replay: string;
 }
 
 const TableRow: React.FC<{ match: Match }> = ({ match }) => {
-  let backgroundColor;
-  if (match.type === 'unranked') {
-    backgroundColor = 'rgb(209, 236, 201)'; // light red
-  } else if (match.type === 'ranked') {
-    backgroundColor = 'rgb(245, 205, 213)'; // light green
-  } else if (match.type === 'tournament') {
-    backgroundColor = 'rgb(255, 255, 0)'; // yellow
+  let outcomeMsg = '';
+  if (match.outcome === 'team1') {
+    outcomeMsg = match.player1;
+  } else if (match.outcome === 'team2') {
+    outcomeMsg = match.player2;
   }
-
   return (
-    <tr style={{ backgroundColor }}>
+    <tr>
       <td>{match.id}</td>
       <td>{match.player1}</td>
       <td>{match.player2}</td>
       <td>{match.type}</td>
       <td>{match.status}</td>
-      <td>{match.outcome}</td>
+      <td>{outcomeMsg}</td>
+      <td>
+        <a href={match.replay}>Download</a>
+      </td>
     </tr>
   );
 };
@@ -54,6 +55,7 @@ const MatchTable: React.FC<{ data: Match[] }> = ({ data }) => (
         <th>Type</th>
         <th>Status</th>
         <th>Outcome</th>
+        <th>Replay</th>
       </tr>
     </thead>
     <TableBody data={data} />
@@ -231,6 +233,7 @@ const Admin: NextPage = () => {
               </Card.Text>
             </Card.Body>
           </Card>
+          <br />
           <Card>
             <Card.Body>
               <Card.Title>Global Match History</Card.Title>
