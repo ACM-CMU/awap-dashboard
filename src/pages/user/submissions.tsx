@@ -22,6 +22,7 @@ import Router from 'next/router';
 
 import { authOptions } from '@pages/api/auth/[...nextauth]';
 import { unstable_getServerSession } from 'next-auth/next';
+import { toast } from 'react-toastify';
 
 // Dynamo DB Config
 const config: DynamoDBClientConfig = {
@@ -115,6 +116,9 @@ const Submissions: NextPage = ({
 
   const uploadFile = async (user: string) => {
     if (!file) return;
+    toast.error('Submissions are not permitted at this time.');
+    window.location.reload();
+    return;
     const time1 = new Date().toLocaleString();
     const time2 = time1.split('/').join('-');
     const time = time2.split(' ').join('');
