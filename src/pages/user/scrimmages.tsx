@@ -102,6 +102,8 @@ const TeamInfo: React.FC<{ oppTeam: Team; playerTeam: string }> = ({
   playerTeam,
 }) => {
   const requestMatch = async () => {
+    toast.error('Match Request not permitted!');
+    return;
     console.log('request sent');
     axios
       .post('/api/user/match-request', {
